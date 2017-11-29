@@ -4,7 +4,8 @@
   "description": "Node library to read data from Omron D6T thermal sensors",
   "main": "d6t.js",
   "dependencies": {
-    "ffi": "~2.2.0"
+    "ffi": "~2.2.0",
+    "sleep": "^5.1.1"
   },
   "devDependencies": {},
   "scripts": {
