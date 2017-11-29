@@ -14,7 +14,7 @@ int d6t_open(d6t_devh_t *d6t, sensor_t sensor)
     d6t->rdbuf  = NULL;
     d6t->fd     = -1;
 
-    // Setting up buffer to store sensor data. Size of buffer is 
+    // Setting up buffer to store sensor data. Size of buffer is
     // determined by the sensor type.
     switch (sensor)
     {
@@ -41,7 +41,7 @@ int d6t_open(d6t_devh_t *d6t, sensor_t sensor)
 
     /// @todo add ability to loop through all i2c-dev files present
     // Attempting to open i2c bus.
-    if ((d6t->fd = open("/dev/i2c-1", O_RDWR)) < 0) 
+    if ((d6t->fd = open("/dev/i2c-1", O_RDWR)) < 0)
     {
         perror("Unable to open i2c control file");
         d6t_close(d6t);
@@ -49,9 +49,9 @@ int d6t_open(d6t_devh_t *d6t, sensor_t sensor)
     }
 
     // If we're able to successfully open the i2c bus, let's check bus
-    // to see if a d6t sensor is present. We will do this by sending a 
+    // to see if a d6t sensor is present. We will do this by sending a
     // read command to the sensor and see if we get an ack.
-    if (i2c_read_reg(d6t->fd, D6T_ADDR, D6T_RD_CMD, d6t->rdbuf, d6t->bufsize) == -1) 
+    if (i2c_read_reg(d6t->fd, D6T_ADDR, D6T_RD_CMD, d6t->rdbuf, d6t->bufsize) == -1)
     {
         printf("No d6t device on bus\n");
         d6t_close(d6t);
