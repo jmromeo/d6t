@@ -2,11 +2,12 @@ var ffi        = require('ffi');
 var ref        = require('ref');
 var StructType = require('ref-struct');
 
+// Omron D6T Device Handle
 var d6t_devh_t = StructType({
-    fd:         ref.types.int,
-    sensor:     ref.types.int,
-    rdbuf:      ref.refType(ref.types.uint8),
-    bufsize:    ref.types.uint8
+    fd:         ref.types.int,                  // file descriptor
+    sensor:     ref.types.int,                  // sensor type enum
+    rdbuf:      ref.refType(ref.types.uint8),   // buffer where sensor data is stored during read
+    bufsize:    ref.types.uint8                 // size of read buffer
 });
 
 var d6t_devh_ptr_t = ref.refType(d6t_devh_t);
@@ -20,7 +21,8 @@ var d6t = ffi.Library('/usr/lib/libd6t', {
 
 });
 
-var d6t_devh = new d6t_devh_t();
-d6t.d6t_open(d6t_devh.ref(), 0);
+// adding devh type to d6t export
+d6t.d6t_devh_t = d6t_devh_t;
 
+// exporting d6t module
 exports.d6t = d6t;
