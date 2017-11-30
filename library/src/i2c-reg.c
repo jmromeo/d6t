@@ -1,9 +1,16 @@
+/**
+ * @file i2c-reg.c
+ *
+ * @brief Contains functions to access i2c registers that require
+ *        write followed by repeated start reads.
+ */
+
 /*
  This software uses a BSD license.
 
  Copyright (c) 2010, Sean Cross / chumby industries
  All rights reserved.
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
  are met:
@@ -13,7 +20,7 @@
  * Redistributions in binary form must reproduce the above copyright
    notice, this list of conditions and the following disclaimer in the
    documentation and/or other materials provided with the
-   distribution.  
+   distribution.
  * Neither the name of Sean Cross / chumby industries nor the names
    of its contributors may be used to endorse or promote products
    derived from this software without specific prior written
@@ -46,16 +53,16 @@
 
 
 /**
- * @brief Reads register of i2c device using a write with register address 
+ * @brief Reads register of i2c device using a write with register address
  *        as data followed by repeated start reads.
  *
  * @param fd        File descriptor of opened i2c file.
  * @param addr      Address of i2c device to perform register read on.
  * @param reg       Register address to read from i2c device.
- * @param rdbuf     Buffer to store read data. Should be at least size 
+ * @param rdbuf     Buffer to store read data. Should be at least size
  *                  of rdbytes.
  * @param rdbytes   Number of bytes to read.
- *                 
+ *
  *
  * Example usage:
  * @code
@@ -72,7 +79,7 @@
  * }
  *
  * while(1) {
- *     i2c_read_reg(fd_i2c, D6T_ADDR, D6T_CMD, &buf, 1); 
+ *     i2c_read_reg(fd_i2c, D6T_ADDR, D6T_CMD, &buf, 1);
  *     printf("0x%02X\n", buf);
  *     sleep(1);
  * }
@@ -81,7 +88,7 @@
  *
  * @endcode
  */
-int i2c_read_reg(int fd, uint8_t addr, uint8_t reg, uint8_t *rdbuf, uint8_t rdbytes) 
+int i2c_read_reg(int fd, uint8_t addr, uint8_t reg, uint8_t *rdbuf, uint8_t rdbytes)
 {
     struct i2c_rdwr_ioctl_data packets;
     struct i2c_msg messages[2];

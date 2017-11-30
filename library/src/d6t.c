@@ -1,14 +1,89 @@
+/**
+ * @file d6t.c
+ *
+ * @brief Contains functions to access Omron D6T thermal imaging sensors.
+ */
+
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <dirent.h>
+#include <string.h>
 
 #include "d6t.h"
 #include "i2c-reg.h"
 
+static int i2c_open(d6t_devh_t *d6t)
+{
+    DIR     *dirp;
+    struct  dirent *dp;
+    char    i2c_devname[] = "/dev/i2c-";
+    int     checklength   = strlen(i2c_devname);
 
-int d6t_open(d6t_devh_t *d6t, sensor_t sensor)
+    // opening /dev directory so we can get a list of i2c device files
+    dirp = opendir("/dev/");
+    if (dirp == NULL) {
+        return -1;
+    }
+
+    // looping through files in /dev directory and checking if they are
+    // an i2c device. if we find an i2c device we will attempt a read to
+    // see if a d6t device exists on the bus, otherwise we will continue
+    // checking
+    while ((dp = readdir(dirp)) != NULL)
+    {
+        // found i2c device and successfully opened it
+        if ((strncmp(dp->d_name, i2c_devname, checklength) == 0)
+             && ((d6t->fd = open(dp->d_name, O_RDWR)) >= 0))
+        {
+            // attempting read of d6t device
+            if (d6t_read(d6t) != -1)
+            {
+                closedir(dirp);
+                return 0;
+            }
+        }
+    }
+
+    closedir(dirp);
+    return -1;
+}
+
+
+/**
+ * @brief Opens I2C bus with D6T device and fills in D6T device handle.
+ *
+ * @param d6t           D6T device handle, containing buffer and file
+ *                      descriptor needed to use d6t read function.
+ * @param sensor        Sensor type. See sensor_t enum for more details.
+ * @param i2c_devname   I2C device file name. If NULL, will search all I2C
+ *                      adapters for D6T device.
+ *
+ * Example usage:
+ * @code
+ *
+ * d6t_devh_t d6t;
+ *
+ * if (d6t_open(&d6t, D6T_44L_06, NULL) < 0)
+ * {
+ *     exit(-1);
+ * }
+ *
+ * while(1)
+ * {
+ *     d6t_read(&d6t);
+ *     printBuf(d6t.rdbuf);
+ *     usleep(250000);
+ * }
+ *
+ * d6t_close(d6t);
+ *
+ * @endcode
+ */
+int d6t_open(d6t_devh_t *d6t, sensor_t sensor, char *i2c_devname)
 {
     d6t->sensor = sensor;
     d6t->rdbuf  = NULL;
@@ -39,29 +114,64 @@ int d6t_open(d6t_devh_t *d6t, sensor_t sensor)
     d6t->rdbuf = malloc(d6t->bufsize);
 
 
-    /// @todo add ability to loop through all i2c-dev files present
-    // Attempting to open i2c bus.
-    if ((d6t->fd = open("/dev/i2c-1", O_RDWR)) < 0)
+    // if an i2c device name is provided, we will just attempt to open that
+    // device, otherwiese we will check all i2c-dev<num> devices for a d6t
+    // device
+    if (i2c_devname == NULL)
     {
-        perror("Unable to open i2c control file");
-        d6t_close(d6t);
-        return -1;
+        return i2c_open(d6t);
     }
-
-    // If we're able to successfully open the i2c bus, let's check bus
-    // to see if a d6t sensor is present. We will do this by sending a
-    // read command to the sensor and see if we get an ack.
-    if (i2c_read_reg(d6t->fd, D6T_ADDR, D6T_RD_CMD, d6t->rdbuf, d6t->bufsize) == -1)
+    else
     {
-        printf("No d6t device on bus\n");
-        d6t_close(d6t);
-        return -1;
+        if ((d6t->fd = open(i2c_devname, O_RDWR)) < 0)
+        {
+            perror("Unable to open i2c control file");
+            d6t_close(d6t);
+            return -1;
+        }
+
+        // If we're able to successfully open the i2c bus, let's check bus
+        // to see if a d6t sensor is present. We will do this by sending a
+        // read command to the sensor and see if we get an ack.
+        if (d6t_read(d6t) == -1)
+        {
+            printf("No d6t device on bus\n");
+            d6t_close(d6t);
+            return -1;
+        }
     }
 
     return 0;
 }
 
 
+/**
+ * @brief Closes I2C device handle and cleans up D6T read buffer.
+ *
+ * @param d6t   D6T device handle, containing buffer and file descriptor
+ *              needed to use d6t read function.
+ *
+ * Example usage:
+ * @code
+ *
+ * d6t_devh_t d6t;
+ *
+ * if (d6t_open(&d6t, D6T_44L_06, NULL) < 0)
+ * {
+ *     exit(-1);
+ * }
+ *
+ * while(1)
+ * {
+ *     d6t_read(&d6t);
+ *     printBuf(d6t.rdbuf);
+ *     usleep(250000);
+ * }
+ *
+ * d6t_close(d6t);
+ *
+ * @endcode
+ */
 void d6t_close(d6t_devh_t *d6t)
 {
     if (d6t->rdbuf != NULL) {
@@ -73,9 +183,36 @@ void d6t_close(d6t_devh_t *d6t)
 }
 
 
-void d6t_read(d6t_devh_t *d6t)
+/**
+ * @brief Reads from D6T device and fills in d6t read buffer.
+ *
+ * @param d6t   D6T device handle, containing buffer and file descriptor
+ *              needed to use d6t read function.
+ *
+ * Example usage:
+ * @code
+ *
+ * d6t_devh_t d6t;
+ *
+ * if (d6t_open(&d6t, D6T_44L_06, NULL) < 0)
+ * {
+ *     exit(-1);
+ * }
+ *
+ * while(1)
+ * {
+ *     d6t_read(&d6t);
+ *     printBuf(d6t.rdbuf);
+ *     usleep(250000);
+ * }
+ *
+ * d6t_close(d6t);
+ *
+ * @endcode
+ */
+int d6t_read(d6t_devh_t *d6t)
 {
-    i2c_read_reg(d6t->fd, D6T_ADDR, D6T_RD_CMD, d6t->rdbuf, d6t->bufsize);
+    return i2c_read_reg(d6t->fd, D6T_ADDR, D6T_RD_CMD, d6t->rdbuf, d6t->bufsize);
 }
 
 

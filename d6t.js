@@ -17,7 +17,7 @@ var d6t = ffi.Library('/usr/lib/libd6t', {
 
   'd6t_open'  : [ 'int',   [ d6t_devh_ptr_t, 'int' ] ],
   'd6t_close' : [ 'void',  [ d6t_devh_ptr_t        ] ],
-  'd6t_read'  : [ 'void',  [ d6t_devh_ptr_t        ] ],
+  'd6t_read'  : [ 'int',   [ d6t_devh_ptr_t        ] ],
 
 });
 

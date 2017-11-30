@@ -21,7 +21,8 @@ void printBuf(uint8_t *buf)
         {
             printf("\n");
         }
-        printf("%d ", 256*buf[i+1] + buf[i]);
+        temp = (256 * buf[i+1] + buf[i]) / 10.0;
+        printf("%3.1f ", temp);
     }
 }
 
@@ -30,19 +31,18 @@ int main()
     d6t_devh_t d6t;
 
     printf("Opening device\n");
-    if (d6t_open(&d6t, D6T_44L_06) < 0)
+    if (d6t_open(&d6t, D6T_44L_06, NULL) < 0)
     {
         exit(-1);
     }
 
 
-    while(1) 
+    while(1)
     {
         d6t_read(&d6t);
         printBuf(d6t.rdbuf);
         usleep(250000);
     }
-
 
     return 0;
 }
