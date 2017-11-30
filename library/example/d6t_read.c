@@ -31,6 +31,7 @@ int main()
     d6t_devh_t d6t;
 
     printf("Opening device\n");
+//    if (d6t_open(&d6t, D6T_44L_06, "/dev/i2c-1") < 0)
     if (d6t_open(&d6t, D6T_44L_06, NULL) < 0)
     {
         exit(-1);
