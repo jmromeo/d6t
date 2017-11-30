@@ -6,8 +6,8 @@ var sleep   = require('sleep')
 var d6t_devh = new d6t.d6t_devh_t();
 
 // opening d6t device
-d6t.d6t_open(d6t_devh.ref(), 0, null);
-//d6t.d6t_open(d6t_devh.ref(), 0, '/dev/i2c-1');
+d6t.d6t_open(d6t_devh.ref(), d6t.D6T_44L_06, null);
+//d6t.d6t_open(d6t_devh.ref(), d6t.D6T_44L_06, '/dev/i2c-1');
 
 while(1)
 {

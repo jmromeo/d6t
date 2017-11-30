@@ -6,7 +6,7 @@ var sleep   = require('sleep')
 var d6t_devh = new d6t.d6t_devh_t();
 
 // opening d6t device
-d6t.d6t_open_js(d6t_devh, 0, null);
+d6t.d6t_open_js(d6t_devh, d6t.D6T_44L_06, null);
 
 while(1)
 {

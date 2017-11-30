@@ -10,7 +10,10 @@ var d6t_devh_t = StructType({
     bufsize:    ref.types.uint8                 // size of read buffer
 });
 
+
+// device handler ptr type
 var d6t_devh_ptr_t = ref.refType(d6t_devh_t);
+
 
 // importing d6t library
 var d6t = ffi.Library('/usr/lib/libd6t', {
@@ -20,6 +23,7 @@ var d6t = ffi.Library('/usr/lib/libd6t', {
   'd6t_read'  : [ 'int',   [ d6t_devh_ptr_t                  ] ],
 
 });
+
 
 // adding d6t wrappers to make calls to library cleaner
 d6t.d6t_open_js = function(d6t_devh, sensor, i2c_devname)
@@ -49,8 +53,16 @@ d6t.d6t_read_js = function(d6t_devh)
     return data;
 }
 
-// adding devh type to d6t export
+
+// D6T DEVH
 d6t.d6t_devh_t = d6t_devh_t;
+
+// D6T Sensor Types (must match what's in d6t.h in library)
+d6t.D6T_44L_06 = 0;
+d6t.D6T_8L_06  = 1;
+d6t.D6T_1A_01  = 2;
+d6t.D6T_1A_02  = 3;
+d6t.D6T_8L_09  = 4;
 
 // exporting d6t module
 exports.d6t = d6t;
