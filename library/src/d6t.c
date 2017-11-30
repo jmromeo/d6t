@@ -20,8 +20,8 @@ static int i2c_open(d6t_devh_t *d6t)
 {
     DIR     *dirp;
     struct  dirent *dp;
-    char    i2c_devname[] = "/dev/i2c-";
-    int     checklength   = strlen(i2c_devname);
+    char    i2c_devname[] = "i2c-";
+    char    devpath[10];
 
     // opening /dev directory so we can get a list of i2c device files
     dirp = opendir("/dev/");
@@ -35,15 +35,17 @@ static int i2c_open(d6t_devh_t *d6t)
     // checking
     while ((dp = readdir(dirp)) != NULL)
     {
-        // found i2c device and successfully opened it
-        if ((strncmp(dp->d_name, i2c_devname, checklength) == 0)
-             && ((d6t->fd = open(dp->d_name, O_RDWR)) >= 0))
+        if (strncmp(dp->d_name, i2c_devname, strlen(i2c_devname)) == 0)
         {
-            // attempting read of d6t device
-            if (d6t_read(d6t) != -1)
+            strcpy(devpath, "/dev/");
+            strcat(devpath, dp->d_name);
+            if ((d6t->fd = open(devpath, O_RDWR)) >= 0)
             {
-                closedir(dirp);
-                return 0;
+                if (d6t_read(d6t) != -1)
+                {
+                    closedir(dirp);
+                    return 0;
+                }
             }
         }
     }

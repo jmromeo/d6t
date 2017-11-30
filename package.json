@@ -1,6 +1,6 @@
 {
   "name": "d6t",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Node library to read data from Omron D6T thermal sensors",
   "main": "d6t.js",
   "dependencies": {

@@ -3,7 +3,7 @@ SHARED			 = libd6t.so
 OBJS				 = d6t.o i2c-reg.o
 SRCS				 = $(OBJS:.o=.c)
 INCLUDEDIRS	+= -I../include
-LIBDIRS			+= 
+LIBDIRS			+=
 CFLAGS			 = $(INCLUDEDIRS) -W -Wall -O2 -fpic
 
 CC			= gcc
@@ -24,7 +24,7 @@ $(SHARED): $(OBJS)
 
 install:
 	cp $(SHARED) /usr/lib/
-	
+
 clean:
 	rm -f $(OBJS) $(TARGET) $(SHARED) ../lib/$(TARGET) ../lib/$(SHARED)
 
