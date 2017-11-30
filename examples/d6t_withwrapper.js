@@ -1,6 +1,5 @@
 var d6t     = require('../d6t').d6t;
 var ref     = require('ref');
-var sleep   = require('sleep')
 
 // creating devh pointer used by d6t library
 var d6t_devh = new d6t.d6t_devh_t();
@@ -8,9 +7,7 @@ var d6t_devh = new d6t.d6t_devh_t();
 // opening d6t device
 d6t.d6t_open_js(d6t_devh, d6t.D6T_44L_06, null);
 
-while(1)
-{
-    sleep.sleep(1);
+setInterval(function() {
 
     // performing read, getting pointer to data from d6t device handle
     var data = d6t.d6t_read_js(d6t_devh);
@@ -27,7 +24,10 @@ while(1)
     // last byte is error check code used for crc
     var pec = data[data.length-1];
     console.log("pec: 0x%s", pec.toString(16));
-}
 
-d6t.d6t_close_js(d6t_devh);
+}, 250);
+
+process.on('exit', function() {
+    d6t.d6t_close_js(d6t_devh);
+});
 
