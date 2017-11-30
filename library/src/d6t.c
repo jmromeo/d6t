@@ -119,7 +119,12 @@ int d6t_open(d6t_devh_t *d6t, sensor_t sensor, char *i2c_devname)
     // device
     if (i2c_devname == NULL)
     {
-        return i2c_open(d6t);
+        if (i2c_open(d6t) == -1)
+        {
+            printf("Unable to find d6t device on any i2c bus\n");
+            d6t_close(d6t);
+            return -1;
+        }
     }
     else
     {

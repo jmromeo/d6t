@@ -1,4 +1,4 @@
-var d6t     = require('../../d6t').d6t;
+var d6t     = require('../d6t').d6t;
 var ref     = require('ref');
 var sleep   = require('sleep')
 
