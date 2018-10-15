@@ -3,7 +3,7 @@
 
  Copyright (c) 2010, Sean Cross / chumby industries
  All rights reserved.
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
  are met:
@@ -13,7 +13,7 @@
  * Redistributions in binary form must reproduce the above copyright
    notice, this list of conditions and the following disclaimer in the
    documentation and/or other materials provided with the
-   distribution.  
+   distribution.
  * Neither the name of Sean Cross / chumby industries nor the names
    of its contributors may be used to endorse or promote products
    derived from this software without specific prior written
@@ -39,5 +39,6 @@
 #include <stdint.h>
 
 int i2c_read_reg(int fd, uint8_t addr, uint8_t reg, uint8_t *rdbuf, uint8_t rdbuf_size);
+int i2c_write(int fd, uint8_t addr, uint8_t *wrbuf, uint8_t wrbytes);
 
 #endif // __I2C_REG_H__

@@ -48,6 +48,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "i2c-reg.h"
 
@@ -116,5 +117,39 @@ int i2c_read_reg(int fd, uint8_t addr, uint8_t reg, uint8_t *rdbuf, uint8_t rdby
 
     return 0;
 }
+
+
+/**
+ * @brief Writes data in wrbuf to i2c device specified by address.
+ *
+ * @param fd        File descriptor of opened i2c file.
+ * @param addr      Address of i2c device to perform write on.
+ * @param wrbuf     Buffer with data to be written. Should be at least size
+ *                  of wrbytes.
+ * @param wrbytes   Number of bytes to write.
+ */
+int i2c_write(int fd, uint8_t addr, uint8_t *wrbuf, uint8_t wrbytes)
+{
+    struct i2c_rdwr_ioctl_data packets;
+    struct i2c_msg messages;
+
+    // writing "reg" in data portion of i2c packet, representing the address
+    // of the register we would like to read from
+    messages.addr  = addr;
+    messages.flags = 0;
+    messages.len   = wrbytes;
+    messages.buf   = wrbuf;
+
+    // sending i2c write command
+    packets.msgs      = &messages;
+    packets.nmsgs     = 1;
+    if(ioctl(fd, I2C_RDWR, &packets) < 0) {
+        perror("Unable to send data");
+        return -1;
+    }
+
+    return 0;
+}
+
 
 

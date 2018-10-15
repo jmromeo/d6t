@@ -22,6 +22,10 @@ typedef struct
     sensor_t  sensor;
     uint8_t   *rdbuf;
     uint8_t   bufsize;
+
+    uint8_t   *setupbuf;
+    uint8_t   setup_nummsgs;
+    uint8_t   setup_msgsize;
 } d6t_devh_t;
 
 

@@ -16,6 +16,19 @@
 #include "d6t.h"
 #include "i2c-reg.h"
 
+
+#define D6T_8L_09_SETUP_MSG_SIZE 4
+#define D6T_8L_09_SETUP_NUM_MSGS 5
+static uint8_t d6t_8l_09_setupbuf[D6T_8L_09_SETUP_NUM_MSGS][D6T_8L_09_SETUP_MSG_SIZE] =
+{
+    {0x02, 0x00, 0x01, 0xEE},
+    {0x05, 0x90, 0x3A, 0xB8},
+    {0x03, 0x00, 0x03, 0x8B},
+    {0x03, 0x00, 0x07, 0x97},
+    {0x02, 0x00, 0x00, 0xE9}
+};
+
+
 static int i2c_open(d6t_devh_t *d6t)
 {
     DIR     *dirp;
@@ -53,7 +66,6 @@ static int i2c_open(d6t_devh_t *d6t)
     closedir(dirp);
     return -1;
 }
-
 
 /**
  * @brief Opens I2C bus with D6T device and fills in D6T device handle.
@@ -109,12 +121,17 @@ int d6t_open(d6t_devh_t *d6t, sensor_t sensor, char *i2c_devname)
             break;
 
         case D6T_8L_09:
+            d6t->bufsize = 19;
+            d6t->setupbuf = &d6t_8l_09_setupbuf[0][0];
+            d6t->setup_nummsgs = D6T_8L_09_SETUP_NUM_MSGS;
+            d6t->setup_msgsize = D6T_8L_09_SETUP_MSG_SIZE;
+            break;
+
         default:
             printf("Device not supported\n");
             return -1;
     }
     d6t->rdbuf = malloc(d6t->bufsize);
-
 
     // if an i2c device name is provided, we will just attempt to open that
     // device, otherwiese we will check all i2c-dev<num> devices for a d6t
@@ -189,7 +206,6 @@ void d6t_close(d6t_devh_t *d6t)
     }
 }
 
-
 /**
  * @brief Reads from D6T device and fills in d6t read buffer.
  *
@@ -219,6 +235,25 @@ void d6t_close(d6t_devh_t *d6t)
  */
 int d6t_read(d6t_devh_t *d6t)
 {
+    // performing special pre-setup before read for some sensors
+    switch (d6t->sensor)
+    {
+        // special setup for D6T_8L_09
+        case D6T_8L_09:
+            for (int i = 0; i < d6t->setup_nummsgs; i++)
+            {
+                i2c_write(d6t->fd,
+                          D6T_ADDR,
+                          &d6t->setupbuf[i*d6t->setup_nummsgs],
+                          d6t->setup_msgsize);
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    // reading and returning sensor data
     return i2c_read_reg(d6t->fd, D6T_ADDR, D6T_RD_CMD, d6t->rdbuf, d6t->bufsize);
 }
 
