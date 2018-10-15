@@ -244,7 +244,7 @@ int d6t_read(d6t_devh_t *d6t)
             {
                 i2c_write(d6t->fd,
                           D6T_ADDR,
-                          &d6t->setupbuf[i*d6t->setup_nummsgs],
+                          &d6t->setupbuf[i*d6t->setup_msgsize],
                           d6t->setup_msgsize);
             }
             break;
